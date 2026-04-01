@@ -1,0 +1,27 @@
+name: "RuralWaterEnv-Odisha"
+version: "2.0.0"
+description: "OpenEnv-compatible household water management environment for Odisha with supply, quality, leak, and seasonal dynamics."
+contact: "KaustavMP"
+url: "https://huggingface.co/spaces/KaustavMP/JalGuard"
+
+action_type: "models.Action"
+observation_type: "models.Observation"
+
+tasks:
+  - id: "easy_fill"
+    description: "Always-on power/supply. Keep the tank available for daily demand."
+  - id: "manage_demand"
+    description: "Meet highly variable demand while preventing overflow."
+  - id: "seasonal_shifts"
+    description: "Handle a winter-to-summer-to-monsoon transition."
+  - id: "chlorination"
+    description: "Respond to contamination spikes using safe chlorination."
+  - id: "catch_leaks"
+    description: "Detect and fix leak losses while meeting demand."
+  - id: "erratic_supply"
+    description: "Survive unreliable supply windows and power cuts."
+  - id: "odisha_survival"
+    description: "All stochastic events active for full challenge mode."
+
+max_steps: 720
+reward_range: [-10.0, 1.0]
