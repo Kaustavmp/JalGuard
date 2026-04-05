@@ -1,3 +1,14 @@
+---
+title: JalGuard
+emoji: 💧
+colorFrom: blue
+colorTo: green
+sdk: docker
+app_port: 7860
+tags:
+  - openenv
+---
+
 # JalGuard
 
 JalGuard is an OpenEnv-compatible rural water intelligence platform with a modular FastAPI backend, conversational AI copilot, and a 4-page responsive UI plus user settings.
