@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>JalGuard - User Settings</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&family=Sora:wght@600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/static/css/styles.css" />
+</head>
+<body>
+  <header class="nav">
+    <div class="nav-inner">
+      <div class="brand"><span class="brand-dot"></span>JalGuard Control Suite</div>
+      <nav class="nav-links">
+        <a class="nav-link" data-page="dashboard" href="/dashboard">Dashboard</a>
+        <a class="nav-link" data-page="scenario" href="/scenario-builder">Scenario Builder</a>
+        <a class="nav-link" data-page="analytics" href="/analytics">Analytics & Reports</a>
+        <a class="nav-link" data-page="admin" href="/admin-panel">Admin Panel</a>
+      </nav>
+      <a class="profile-link" id="profileLink" href="/settings">JG</a>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="status-bar">
+      <div class="status-pill">FastAPI<strong id="statusFastAPI">-</strong></div>
+      <div class="status-pill">Simulation Engine<strong id="statusOpenEnv">-</strong></div>
+      <div class="status-pill">AI Assistant<strong id="statusAssistant">-</strong></div>
+      <div class="status-pill">Current Task<strong id="statusTask">-</strong></div>
+    </section>
+
+    <section class="grid">
+      <article class="card" style="grid-column: span 12;">
+        <h3>Account</h3>
+        <div class="form-row">
+          <input id="accountName" placeholder="Display Name" />
+          <input id="accountEmail" placeholder="Email Address" />
+        </div>
+        <div class="form-row">
+          <input id="accountPhoto" type="file" accept="image/*" style="max-width: 320px;" />
+          <img id="accountPhotoPreview" class="avatar-preview" alt="Profile" />
+          <button id="changePasswordBtn" class="btn secondary" type="button">Change Password</button>
+          <span class="tag">Account Created: <strong id="accountCreatedAt">-</strong></span>
+        </div>
+      </article>
+
+      <article class="card" style="grid-column: span 12;">
+        <h3>Scenario History</h3>
+        <div class="form-row">
+          <input id="historySearch" placeholder="Search scenarios by name" />
+          <button id="refreshHistoryBtn" class="btn secondary" type="button">Refresh</button>
+        </div>
+        <div id="settingsHistoryList" class="history-list tall"></div>
+      </article>
+
+      <article class="card" style="grid-column: span 6;">
+        <h3>AI Assistant Settings</h3>
+        <div class="form-row">
+          <label class="switch-line">
+            <input id="assistantExplain" type="checkbox" />
+            <span>Explain reasoning out loud</span>
+          </label>
+        </div>
+        <div class="form-row">
+          <label style="width:100%;">Response detail
+            <select id="assistantDetail">
+              <option value="brief">Brief</option>
+              <option value="balanced">Balanced</option>
+              <option value="detailed">Detailed</option>
+            </select>
+          </label>
+        </div>
+        <div class="form-row">
+          <label class="switch-line">
+            <input id="assistantAutoSuggest" type="checkbox" />
+            <span>Suggest and apply actions automatically during auto-run</span>
+          </label>
+        </div>
+        <div class="form-row">
+          <input id="assistantPersona" placeholder="Assistant persona name" />
+        </div>
+      </article>
+
+      <article class="card" style="grid-column: span 6;">
+        <h3>Display Preferences</h3>
+        <div class="form-row">
+          <label style="width:100%;">Theme
+            <select id="displayTheme">
+              <option value="dark">Dark</option>
+              <option value="light">Light</option>
+            </select>
+          </label>
+        </div>
+        <div class="form-row">
+          <label style="width:100%;">Live log detail
+            <select id="displayLogMode">
+              <option value="all">Every step</option>
+              <option value="significant">Significant events only</option>
+            </select>
+          </label>
+        </div>
+        <div class="form-row">
+          <label style="width:100%;">Chart updates
+            <select id="displayChartMode">
+              <option value="realtime">Real-time updates</option>
+              <option value="episode">After episode completes</option>
+            </select>
+          </label>
+        </div>
+        <div class="form-row">
+          <input id="displayLanguage" value="English" />
+        </div>
+      </article>
+    </section>
+
+    <section class="quick-actions" style="margin-top: 10px;">
+      <button id="saveSettingsBtn" class="btn accent">Save Settings</button>
+    </section>
+  </main>
+
+  <a class="help-fab" href="/docs" title="Help">?</a>
+  <div class="toast-wrap" id="toastWrap"></div>
+  <div class="modal" id="onboardModal"><div class="modal-content"><h3>Quick Onboarding</h3><p id="onboardBody"></p><button id="onboardNext" class="btn">Next</button></div></div>
+
+  <script src="/static/js/common.js"></script>
+  <script src="/static/js/settings.js"></script>
+</body>
+</html>

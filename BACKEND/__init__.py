@@ -1,1 +1,1 @@
-# JalGuard backend package
+# backend package

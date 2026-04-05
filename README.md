@@ -1,48 +1,76 @@
 # JalGuard
 
-JalGuard is a hackathon-ready rural water management simulator for Odisha with:
+JalGuard is an OpenEnv-compatible rural water intelligence platform with a modular FastAPI backend, conversational AI copilot, and a 4-page responsive UI plus user settings.
 
-- OpenEnv-compliant backend APIs
-- Interactive dashboard UI
-- Ollama-powered action suggestions
-- Root-level `inference.py` for baseline reproducibility
-- Docker + `openenv.yaml` for deployment packaging
+## Main UI Pages
 
-## Quick start (Windows)
+1. Dashboard (Live Control Center)
+2. Scenario Builder
+3. Analytics & Reports
+4. Admin Panel (Validation + Developer Tools)
 
-1. Double-click `Start-JalGuard.bat`
-2. Browser opens automatically at `http://127.0.0.1:7860/dashboard`
+## Backend Architecture
 
-## Manual start
+```
+backend/
+  core/
+    environment.py
+    actions.py
+    state.py
+    config.py
+  tasks/
+    *.py
+    registry.py
+  services/
+    ai_service.py
+    logger.py
+    scenario_loader.py
+  api/
+    routes_env.py
+    routes_tasks.py
+    routes_ai.py
+    routes_admin.py
+  utils/
+    validators.py
+    exceptions.py
+```
+
+## Run
 
 ```powershell
 pip install -r requirements.txt
-uvicorn BACKEND.main:app --host 0.0.0.0 --port 7860
+python start_jalguard.py
 ```
 
-## Baseline inference
+or
+
+```powershell
+uvicorn backend.main:app --host 0.0.0.0 --port 7860
+```
+
+Open: `http://127.0.0.1:7860/dashboard`
+
+## Inference
+
+`inference.py` is at repo root and emits structured logs:
+
+- `[START] {...}`
+- `[STEP] {...}`
+- `[END] {...}`
+
+Run:
 
 ```powershell
 python inference.py
 ```
 
-## Pre-submission checklist run
+## Required Environment Variables
 
-```powershell
-$env:API_BASE_URL="http://127.0.0.1:11434/v1"
-$env:MODEL_NAME="llama3.1:8b"
-$env:HF_TOKEN="ollama"
-python pre_submission_check.py
-```
+- `API_BASE_URL` (default: `https://api.openai.com/v1`)
+- `MODEL_NAME` (default: `gpt-4o-mini`)
+- `OPENAI_API_KEY`
 
-## Important environment variables
-
-- `API_BASE_URL` (Ollama OpenAI-compatible endpoint, default `http://127.0.0.1:11434/v1`)
-- `MODEL_NAME` (default `llama3.1:8b`)
-- `HF_TOKEN` (API key placeholder for OpenAI client; default `ollama`)
-- `ENV_URL` (default `http://127.0.0.1:7860`)
-
-## Deploy targets
+## Deployment Targets
 
 - GitHub: `git@github.com:Kaustavmp/JalGuard.git`
 - Hugging Face Space: `KaustavMP/JalGuard`

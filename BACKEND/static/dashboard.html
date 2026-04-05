@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>JalGuard - Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&family=Sora:wght@600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/static/css/styles.css" />
+</head>
+<body>
+  <header class="nav">
+    <div class="nav-inner">
+      <div class="brand"><span class="brand-dot"></span>JalGuard Control Suite</div>
+      <nav class="nav-links">
+        <a class="nav-link" data-page="dashboard" href="/dashboard">Dashboard</a>
+        <a class="nav-link" data-page="scenario" href="/scenario-builder">Scenario Builder</a>
+        <a class="nav-link" data-page="analytics" href="/analytics">Analytics & Reports</a>
+        <a class="nav-link" data-page="admin" href="/admin-panel">Admin Panel</a>
+      </nav>
+      <a class="profile-link" id="profileLink" href="/settings">JG</a>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="status-bar">
+      <div class="status-pill">FastAPI<strong id="statusFastAPI">-</strong></div>
+      <div class="status-pill">Simulation Engine<strong id="statusOpenEnv">-</strong></div>
+      <div class="status-pill">AI Assistant<strong id="statusAssistant">-</strong></div>
+      <div class="status-pill">Current Task<strong id="statusTask">-</strong></div>
+    </section>
+
+    <section class="quick-actions">
+      <button class="btn" data-qa="start">Start Episode</button>
+      <button class="btn secondary" data-qa="reset">Reset</button>
+      <button class="btn accent" data-qa="ask-ai">Ask AI</button>
+      <button class="btn ghost" data-qa="download">Download Report</button>
+    </section>
+
+    <section class="grid">
+      <article class="card" style="grid-column: span 5;">
+        <h3>Live Control Center</h3>
+        <p class="desc">Select task and control episode lifecycle.</p>
+        <div class="form-row">
+          <select id="taskSelect"></select>
+          <button id="startBtn" class="btn">Start</button>
+          <button id="resetBtn" class="btn secondary">Reset</button>
+          <button id="gradeBtn" class="btn accent">Grade</button>
+        </div>
+        <p id="taskDesc" class="desc"></p>
+      </article>
+
+      <article class="card" style="grid-column: span 7;">
+        <h3>Real-Time State</h3>
+        <div class="metric-grid ten">
+          <div class="metric"><span>Tank</span><strong id="mTank">-</strong></div>
+          <div class="metric"><span>Chlorine</span><strong id="mChlorine">-</strong></div>
+          <div class="metric"><span>Demand</span><strong id="mDemand">-</strong></div>
+          <div class="metric"><span>Day</span><strong id="mDay">-</strong></div>
+          <div class="metric"><span>Reward</span><strong id="mReward">-</strong></div>
+          <div class="metric">
+            <span>pH Level</span>
+            <strong id="mPh" class="ok-text">-</strong>
+          </div>
+          <div class="metric">
+            <span>Water Quality</span>
+            <div class="quality-meter"><div id="mQualityBar"></div></div>
+            <strong id="mQualityVal">-</strong>
+          </div>
+          <div class="metric"><span>Supply Status</span><strong><span id="mSupply" class="pill">-</span></strong></div>
+          <div class="metric"><span>Power</span><strong><span id="mPower" class="pill">-</span></strong></div>
+          <div class="metric"><span>Season</span><strong><span id="mSeason" class="badge">-</span></strong></div>
+        </div>
+        <div class="form-row" style="margin-top:8px;">
+          <span class="tag">Step: <strong id="mStep">0</strong></span>
+        </div>
+      </article>
+
+      <article class="card" style="grid-column: span 6;">
+        <h3>Action Console</h3>
+        <div class="action-grid">
+          <button id="pumpOnBtn" class="action-tile" type="button">
+            <strong>Pump</strong>
+            <span>Move municipal water into storage</span>
+            <em id="pumpOnState">OFF</em>
+            <i id="pumpAnim" class="pump-dot"></i>
+          </button>
+          <button id="chlorinateBtn" class="action-tile" type="button">
+            <strong>Chlorination</strong>
+            <span>Sanitize water when contamination risk rises</span>
+            <em id="chlorinateState">OFF</em>
+            <small id="chlorinateCountdown" class="desc-inline"></small>
+          </button>
+          <button id="checkLeakBtn" class="action-tile" type="button">
+            <strong>Leak Check</strong>
+            <span>Inspect and repair hidden line leakage</span>
+            <em id="checkLeakState">OFF</em>
+          </button>
+          <button id="harvesterOnBtn" class="action-tile" type="button">
+            <strong>Rain Harvester</strong>
+            <span>Capture rainwater directly into storage</span>
+            <em id="harvesterOnState">OFF</em>
+          </button>
+        </div>
+        <div class="form-row">
+          <label style="width:100%;">Release Slider: <strong id="releaseVal">0%</strong> (<span id="releaseLitres">0L</span>)
+            <input id="releaseWater" type="range" min="0" max="100" value="0" />
+          </label>
+        </div>
+        <div class="form-row">
+          <button id="runStepBtn" class="btn">Run Step</button>
+          <input id="multiSteps" type="number" min="1" max="200" value="24" style="max-width:130px;" />
+          <button id="runMultiBtn" class="btn secondary">Multi-Step</button>
+          <button id="autoRunBtn" class="btn ghost">Auto Run</button>
+        </div>
+      </article>
+
+      <article class="card" style="grid-column: span 6;">
+        <h3>AI Copilot</h3>
+        <p class="desc">Ask for a full recommendation, then apply it directly.</p>
+        <textarea id="aiNote" rows="3" placeholder="Optional planning note..."></textarea>
+        <div class="form-row">
+          <button id="askAiBtn" class="btn accent">Suggest Action</button>
+          <button id="applyAiBtn" class="btn ghost">Apply Suggestion</button>
+        </div>
+        <p id="aiReasoning" class="desc">No suggestion yet.</p>
+        <div id="aiPreview" class="log-box prose-box">Assistant recommendations will appear here.</div>
+      </article>
+
+      <article class="card" style="grid-column: span 12;">
+        <h3>Live Operations Feed</h3>
+        <p class="desc">Readable updates from each step of the episode.</p>
+        <div id="liveLogs" class="log-box"></div>
+      </article>
+    </section>
+  </main>
+
+  <a class="help-fab" href="/docs" title="Help">?</a>
+  <div class="toast-wrap" id="toastWrap"></div>
+  <div class="modal" id="onboardModal"><div class="modal-content"><h3>Quick Onboarding</h3><p id="onboardBody"></p><button id="onboardNext" class="btn">Next</button></div></div>
+
+  <script src="/static/js/common.js"></script>
+  <script src="/static/js/dashboard.js"></script>
+</body>
+</html>

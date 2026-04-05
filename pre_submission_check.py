@@ -15,7 +15,7 @@ from models import Action, Observation
 
 ROOT = Path(__file__).resolve().parent
 BASE_URL = "http://127.0.0.1:7860"
-REQUIRED_ENV = ["API_BASE_URL", "MODEL_NAME", "HF_TOKEN"]
+REQUIRED_ENV = ["API_BASE_URL", "MODEL_NAME", "OPENAI_API_KEY"]
 
 
 def print_result(name: str, ok: bool, detail: str) -> None:
@@ -28,15 +28,16 @@ def validate_openenv_yaml() -> Tuple[bool, str]:
     if not path.exists():
         return False, "openenv.yaml missing at root"
     data = yaml.safe_load(path.read_text(encoding="utf-8"))
-    required = ["name", "version", "action_type", "observation_type", "tasks", "max_steps", "reward_range"]
+    required = ["name", "version", "description", "tasks"]
     missing = [key for key in required if key not in data]
     if missing:
         return False, f"Missing keys: {missing}"
-    if data["action_type"] != "models.Action" or data["observation_type"] != "models.Observation":
-        return False, "action_type/observation_type mismatch"
     if not isinstance(data["tasks"], list) or len(data["tasks"]) < 3:
         return False, "tasks must contain at least 3 items"
-    return True, f"{len(data['tasks'])} tasks configured"
+    task_ids = [str(task.get("id", "")) for task in data["tasks"] if isinstance(task, dict)]
+    if len(task_ids) != len(set(task_ids)):
+        return False, "task ids must be unique"
+    return True, f"{len(task_ids)} tasks configured"
 
 
 def validate_models() -> Tuple[bool, str]:
@@ -65,7 +66,7 @@ def wait_for_server(timeout: float = 40.0) -> bool:
 
 def run_server() -> subprocess.Popen:
     return subprocess.Popen(
-        [sys.executable, "-m", "uvicorn", "BACKEND.main:app", "--host", "127.0.0.1", "--port", "7860"],
+        [sys.executable, "-m", "uvicorn", "backend.main:app", "--host", "127.0.0.1", "--port", "7860"],
         cwd=str(ROOT),
     )
 
@@ -175,7 +176,7 @@ def env_var_check() -> Tuple[bool, str]:
     missing = [name for name in REQUIRED_ENV if not os.getenv(name)]
     if missing:
         return False, f"Missing env vars: {missing}"
-    return True, "API_BASE_URL, MODEL_NAME, HF_TOKEN are defined"
+    return True, "API_BASE_URL, MODEL_NAME, OPENAI_API_KEY are defined"
 
 
 def main() -> None:

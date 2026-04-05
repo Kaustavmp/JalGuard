@@ -1,27 +1,36 @@
-name: "RuralWaterEnv-Odisha"
-version: "2.0.0"
-description: "OpenEnv-compatible household water management environment for Odisha with supply, quality, leak, and seasonal dynamics."
-contact: "KaustavMP"
-url: "https://huggingface.co/spaces/KaustavMP/JalGuard"
-
-action_type: "models.Action"
-observation_type: "models.Observation"
-
+name: rural_water_env
+version: "1.0.0"
+description: >
+  Intelligent water tank management for rural Odisha households.
+  AI agents optimize filling, usage, leak detection amid variable
+  supply, contamination risks, and seasonal conditions.
+author: kaustavpriyamohanty
 tasks:
-  - id: "easy_fill"
-    description: "Always-on power/supply. Keep the tank available for daily demand."
-  - id: "manage_demand"
-    description: "Meet highly variable demand while preventing overflow."
-  - id: "seasonal_shifts"
-    description: "Handle a winter-to-summer-to-monsoon transition."
-  - id: "chlorination"
-    description: "Respond to contamination spikes using safe chlorination."
-  - id: "catch_leaks"
-    description: "Detect and fix leak losses while meeting demand."
-  - id: "erratic_supply"
-    description: "Survive unreliable supply windows and power cuts."
-  - id: "odisha_survival"
-    description: "All stochastic events active for full challenge mode."
-
-max_steps: 720
-reward_range: [-10.0, 1.0]
+  - id: fill_timing
+    name: Fill Scheduling
+    difficulty: easy
+    description: Single source, no faults. Learn basic timing.
+  - id: multi_source
+    name: Multi-Source Selection
+    difficulty: easy_medium
+    description: Borewell plus municipal with power cuts.
+  - id: contamination
+    name: Contamination Triage
+    difficulty: medium
+    description: Quarantine and chlorinate decisions.
+  - id: pump_health
+    name: Pump Health Management
+    difficulty: medium
+    description: Wear and repair timing.
+  - id: monsoon
+    name: Monsoon Season
+    difficulty: medium_hard
+    description: All hazards active with rain harvesting.
+  - id: leak_detection
+    name: Leak Detection
+    difficulty: hard
+    description: Hidden escalating fault under sensor noise.
+  - id: full_episode
+    name: 30-Day Summer Survival
+    difficulty: very_hard
+    description: Everything active, designed to challenge frontier models.

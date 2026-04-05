@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>JalGuard - Scenario Builder</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&family=Sora:wght@600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/static/css/styles.css" />
+</head>
+<body>
+  <header class="nav">
+    <div class="nav-inner">
+      <div class="brand"><span class="brand-dot"></span>JalGuard Control Suite</div>
+      <nav class="nav-links">
+        <a class="nav-link" data-page="dashboard" href="/dashboard">Dashboard</a>
+        <a class="nav-link" data-page="scenario" href="/scenario-builder">Scenario Builder</a>
+        <a class="nav-link" data-page="analytics" href="/analytics">Analytics & Reports</a>
+        <a class="nav-link" data-page="admin" href="/admin-panel">Admin Panel</a>
+      </nav>
+      <a class="profile-link" id="profileLink" href="/settings">JG</a>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="status-bar">
+      <div class="status-pill">FastAPI<strong id="statusFastAPI">-</strong></div>
+      <div class="status-pill">Simulation Engine<strong id="statusOpenEnv">-</strong></div>
+      <div class="status-pill">AI Assistant<strong id="statusAssistant">-</strong></div>
+      <div class="status-pill">Current Task<strong id="statusTask">-</strong></div>
+    </section>
+
+    <section class="quick-actions">
+      <button class="btn" data-qa="start">Start Episode</button>
+      <button class="btn secondary" data-qa="reset">Reset</button>
+      <button class="btn accent" data-qa="ask-ai">Ask AI</button>
+      <button class="btn ghost" data-qa="download">Download Report</button>
+    </section>
+
+    <section class="grid">
+      <article class="card" style="grid-column: span 8;">
+        <h3>Scenario Assistant</h3>
+        <p class="desc">Describe your scenario in plain English. The assistant handles all simulation details and saves your setup automatically.</p>
+        <div class="form-row">
+          <input id="scenarioName" placeholder="Optional scenario name (for history)" />
+        </div>
+        <div id="scenarioChat" class="chat-window"></div>
+        <div class="form-row" style="margin-top: 10px;">
+          <textarea id="scenarioPrompt" rows="3" placeholder="Example: Simulate a monsoon village with heavy evening rains and medium leaks."></textarea>
+        </div>
+        <div class="form-row">
+          <button id="sendPromptBtn" class="btn">Send</button>
+          <button id="activateLatestBtn" class="btn accent">Load Latest Scenario</button>
+          <span class="tag">Latest: <strong id="latestScenarioName">-</strong></span>
+        </div>
+      </article>
+
+      <article class="card" style="grid-column: span 4;">
+        <h3>Scenario History</h3>
+        <p class="desc">Find and load past scenarios in one click.</p>
+        <div class="form-row"><input id="historySearch" placeholder="Search by scenario name" /></div>
+        <div id="historyList" class="history-list"></div>
+      </article>
+    </section>
+  </main>
+
+  <a class="help-fab" href="/docs" title="Help">?</a>
+  <div class="toast-wrap" id="toastWrap"></div>
+  <div class="modal" id="onboardModal"><div class="modal-content"><h3>Quick Onboarding</h3><p id="onboardBody"></p><button id="onboardNext" class="btn">Next</button></div></div>
+
+  <script src="/static/js/common.js"></script>
+  <script src="/static/js/scenario.js"></script>
+</body>
+</html>

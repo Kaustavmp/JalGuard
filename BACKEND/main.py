@@ -1,42 +1,32 @@
-from pathlib import Path
-from typing import Any, Dict, List, Optional
+from __future__ import annotations
 
-from fastapi import Body, FastAPI, Query
+from pathlib import Path
+
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 
-try:
-    from .ai_service import OllamaActionService, heuristic_action
-    from .environment import OdishaWaterEnv
-    from .graders import list_tasks, score_episode
-    from .models import (
-        AISuggestRequest,
-        AISuggestResponse,
-        Action,
-        GradeRequest,
-        ResetRequest,
-        ResetResponse,
-        StepResponse,
-    )
-except ImportError:
-    from ai_service import OllamaActionService, heuristic_action
-    from environment import OdishaWaterEnv
-    from graders import list_tasks, score_episode
-    from models import (
-        AISuggestRequest,
-        AISuggestResponse,
-        Action,
-        GradeRequest,
-        ResetRequest,
-        ResetResponse,
-        StepResponse,
-    )
+from backend.api.routes_admin import router as admin_router
+from backend.api.routes_ai import router as ai_router
+from backend.api.routes_env import router as env_router
+from backend.api.routes_tasks import router as tasks_router
+from backend.core.config import AppConfig
+from backend.core.environment import WaterEnvironment
+from backend.services.ai_service import AIService
+from backend.services.logger import EpisodeLogger
+from backend.services.scenario_chat import ScenarioChatService
+from backend.services.scenario_loader import ScenarioLoader
+from backend.utils.exceptions import AppError
+
+
+BASE_DIR = Path(__file__).resolve().parent
+STATIC_DIR = BASE_DIR / "static"
 
 app = FastAPI(
-    title="JalGuard Rural Water Simulator",
-    description="OpenEnv-compatible Odisha household water management environment with dashboard + Ollama copilot.",
-    version="2.0.0",
+    title="JalGuard OpenEnv Platform",
+    description="Modular FastAPI backend for JalGuard with dashboard, scenario builder, analytics, and admin panel.",
+    version="3.0.0",
 )
 
 app.add_middleware(
@@ -46,112 +36,108 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-env = OdishaWaterEnv()
-trajectory: List[Dict[str, Any]] = []
-ai_service = OllamaActionService()
+config = AppConfig.from_env()
+app.state.config = config
+app.state.env = WaterEnvironment()
+app.state.logger = EpisodeLogger(BASE_DIR / "data" / "logs" / "episodes.jsonl")
+app.state.scenario_loader = ScenarioLoader(BASE_DIR / "data" / "scenarios")
+app.state.ai_service = AIService(config)
+app.state.scenario_chat_service = ScenarioChatService(app.state.scenario_loader)
+app.state.trajectory = []
+app.state.validation_jobs = {}
 
-BASE_DIR = Path(__file__).resolve().parent
-STATIC_DIR = BASE_DIR / "static"
-if STATIC_DIR.exists():
-    app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
+app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
-
-@app.get("/")
-def read_root():
-    return {"message": "JalGuard environment online", "dashboard": "/dashboard", "health": "/health"}
-
-
-@app.get("/dashboard")
-def dashboard():
-    index_file = STATIC_DIR / "index.html"
-    if index_file.exists():
-        return FileResponse(index_file)
-    return {"message": "Dashboard UI missing. Build static assets first."}
+app.include_router(env_router)
+app.include_router(tasks_router)
+app.include_router(ai_router)
+app.include_router(admin_router)
 
 
-@app.get("/health")
-def health():
-    return {"status": "ok", "task_id": env.task_id, "step": env.current_step}
+@app.exception_handler(AppError)
+async def app_error_handler(_: Request, exc: AppError):
+    return JSONResponse(status_code=exc.status_code, content={"error": exc.message})
 
 
-@app.get("/tasks")
-@app.get("/api/tasks")
-def get_tasks():
-    return {"tasks": list_tasks()}
-
-
-@app.post("/reset", response_model=ResetResponse)
-@app.post("/api/reset", response_model=ResetResponse)
-@app.post("/reset()")
-def reset(
-    task_id: Optional[str] = Query(default=None),
-    body: Optional[ResetRequest] = Body(default=None),
-):
-    global trajectory
-    selected_task = task_id or (body.task_id if body else "odisha_survival")
-    selected_task = env.set_task(selected_task)
-    trajectory = []
-    obs = env.reset()
-    return ResetResponse(
-        observation=obs,
-        info={"task_id": selected_task, "true_state": env.state.to_dict()},
+@app.exception_handler(Exception)
+async def generic_error_handler(_: Request, exc: Exception):
+    return JSONResponse(
+        status_code=500,
+        content={"error": "Something went wrong. Try resetting the episode."},
     )
 
 
-@app.post("/step", response_model=StepResponse)
-@app.post("/api/step", response_model=StepResponse)
-@app.post("/step()", response_model=StepResponse)
-def step(action: Action):
-    global trajectory
-    obs, reward, done, info = env.step(action)
-    trajectory.append(
-        {
-            "action": action.model_dump(),
-            "observation": obs.model_dump(),
-            "reward": reward,
-            "done": done,
-            "info": info,
-        }
-    )
-    return StepResponse(observation=obs, reward=reward, done=done, info=info)
+@app.on_event("startup")
+def seed_demo_episode() -> None:
+    env = app.state.env
+    logger = app.state.logger
+    ai_service = app.state.ai_service
 
+    if logger.completed_episodes:
+        return
 
-@app.get("/state")
-@app.get("/api/state")
-@app.post("/state")
-@app.post("/api/state")
-@app.post("/state()")
-def get_state():
-    return {"state": env.state.to_dict(), "step": env.current_step, "score": env.score, "task_id": env.task_id}
+    env.set_task("fill_timing")
+    env.reset()
+    logger.start_episode("fill_timing")
+    rewards = []
 
-
-@app.post("/grader")
-@app.post("/api/grader")
-def grader(body: Optional[GradeRequest] = Body(default=None)):
-    request = body or GradeRequest(task_id=env.task_id)
-    score = score_episode(request.task_id, trajectory)
-    return {"task_id": request.task_id, "score": score, "steps": len(trajectory), "status": "graded"}
-
-
-@app.post("/api/ai/suggest-action", response_model=AISuggestResponse)
-def suggest_action(request: AISuggestRequest):
-    observation = request.observation or env._get_observation()
-    action, source, reasoning = ai_service.suggest(observation, request.task_id or env.task_id, request.note)
-    return AISuggestResponse(action=action, source=source, reasoning=reasoning)
-
-
-@app.get("/baseline")
-def run_baseline(task_id: str = "easy_fill"):
-    local_env = OdishaWaterEnv()
-    selected_task = local_env.set_task(task_id)
-    obs = local_env.reset()
-    trajectory_buffer: List[Dict[str, Any]] = []
-    for _ in range(local_env.step_limit):
-        action = heuristic_action(obs)
-        obs, reward, done, info = local_env.step(action)
-        trajectory_buffer.append({"reward": reward, "done": done, "info": info})
+    for _ in range(84):
+        obs = env._observation(leak_detected=False)
+        action = ai_service.heuristic_action(obs)
+        observation, reward, done, _ = env.step(action)
+        rewards.append(float(reward))
+        logger.log_step(
+            step=observation.step_of_episode,
+            state=observation.model_dump(),
+            action=action.model_dump(),
+            reward=reward,
+            source="assistant",
+            reasoning="Automated warm-up run for analytics baseline.",
+        )
         if done:
             break
 
-    score = score_episode(selected_task, trajectory_buffer)
-    return {"task_id": selected_task, "baseline_score": score, "status": "completed", "steps": len(trajectory_buffer)}
+    logger.end_episode(final_score=env.score_episode(rewards), steps=len(rewards))
+    app.state.trajectory = []
+    env.reset()
+
+
+@app.get("/")
+def root() -> FileResponse:
+    return FileResponse(STATIC_DIR / "dashboard.html")
+
+
+@app.get("/health")
+def health() -> dict:
+    env = app.state.env
+    return {"status": "ok", "task_id": env.task.id, "step": env.current_step}
+
+
+@app.get("/dashboard")
+def dashboard() -> FileResponse:
+    return FileResponse(STATIC_DIR / "dashboard.html")
+
+
+@app.get("/scenario-builder")
+def scenario_builder() -> FileResponse:
+    return FileResponse(STATIC_DIR / "scenario.html")
+
+
+@app.get("/analytics")
+def analytics() -> FileResponse:
+    return FileResponse(STATIC_DIR / "analytics.html")
+
+
+@app.get("/admin-panel")
+def admin_panel() -> FileResponse:
+    return FileResponse(STATIC_DIR / "admin.html")
+
+
+@app.get("/settings")
+def settings_page() -> FileResponse:
+    return FileResponse(STATIC_DIR / "settings.html")
+
+
+@app.get("/docs")
+def docs_page() -> FileResponse:
+    return FileResponse(STATIC_DIR / "docs.html")

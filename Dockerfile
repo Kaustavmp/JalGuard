@@ -9,11 +9,11 @@ USER user
 ENV PATH="/home/user/.local/bin:${PATH}"
 
 COPY --chown=user:user requirements.txt ./requirements.txt
-COPY --chown=user:user BACKEND/requirements.txt ./BACKEND/requirements.txt
+COPY --chown=user:user backend/requirements.txt ./backend/requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY --chown=user:user . .
 
 EXPOSE 7860
 
-CMD ["uvicorn", "BACKEND.main:app", "--host", "0.0.0.0", "--port", "7860"]
+CMD ["uvicorn", "backend.main:app", "--host", "0.0.0.0", "--port", "7860"]

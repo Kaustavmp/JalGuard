@@ -1,1 +1,1 @@
-from BACKEND.models import *  # noqa: F401,F403
+from backend.core.actions import *  # noqa: F401,F403

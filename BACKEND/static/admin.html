@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>JalGuard - Admin Panel</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&family=Sora:wght@600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/static/css/styles.css" />
+</head>
+<body>
+  <header class="nav">
+    <div class="nav-inner">
+      <div class="brand"><span class="brand-dot"></span>JalGuard Control Suite</div>
+      <nav class="nav-links">
+        <a class="nav-link" data-page="dashboard" href="/dashboard">Dashboard</a>
+        <a class="nav-link" data-page="scenario" href="/scenario-builder">Scenario Builder</a>
+        <a class="nav-link" data-page="analytics" href="/analytics">Analytics & Reports</a>
+        <a class="nav-link" data-page="admin" href="/admin-panel">Admin Panel</a>
+      </nav>
+      <a class="profile-link" id="profileLink" href="/settings">JG</a>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="status-bar">
+      <div class="status-pill">FastAPI<strong id="statusFastAPI">-</strong></div>
+      <div class="status-pill">Simulation Engine<strong id="statusOpenEnv">-</strong></div>
+      <div class="status-pill">AI Assistant<strong id="statusAssistant">-</strong></div>
+      <div class="status-pill">Current Task<strong id="statusTask">-</strong></div>
+    </section>
+
+    <section class="quick-actions">
+      <button class="btn" data-qa="start">Start Episode</button>
+      <button class="btn secondary" data-qa="reset">Reset</button>
+      <button class="btn accent" data-qa="ask-ai">Ask AI</button>
+      <button class="btn ghost" data-qa="download">Download Report</button>
+    </section>
+
+    <section class="grid">
+      <article class="card" style="grid-column: span 12;">
+        <h3>Pre-Submission Validation Runner</h3>
+        <p class="desc">Run a clean readiness checklist before submission.</p>
+        <div class="form-row">
+          <button id="runValidationBtn" class="btn accent">Run Validation</button>
+          <span class="tag">Status: <strong id="validationStatus">idle</strong></span>
+        </div>
+        <ul id="validationChecklist" class="checklist"></ul>
+        <details class="developer-tools">
+          <summary>View raw validation output</summary>
+          <pre id="validationOutput" class="log-box" style="max-height:260px;"></pre>
+        </details>
+      </article>
+
+      <article class="card" style="grid-column: span 12;">
+        <details class="developer-tools">
+          <summary>Developer Tools</summary>
+          <p class="desc" style="margin-top:10px;">Run quick internal calls when needed during development.</p>
+          <div class="form-row">
+            <select id="playAction">
+              <option value="reset">Reset Episode</option>
+              <option value="step">Run Single Step</option>
+              <option value="state">Read Current State</option>
+            </select>
+          </div>
+          <div class="form-row"><textarea id="playPayload" rows="5">{"task_id":"odisha_survival"}</textarea></div>
+          <button id="playRunBtn" class="btn secondary">Run Tool</button>
+          <pre id="playResponse" class="log-box" style="max-height:220px;">{}</pre>
+        </details>
+      </article>
+    </section>
+  </main>
+
+  <a class="help-fab" href="/docs" title="Help">?</a>
+  <div class="toast-wrap" id="toastWrap"></div>
+  <div class="modal" id="onboardModal"><div class="modal-content"><h3>Quick Onboarding</h3><p id="onboardBody"></p><button id="onboardNext" class="btn">Next</button></div></div>
+
+  <script src="/static/js/common.js"></script>
+  <script src="/static/js/admin.js"></script>
+</body>
+</html>
