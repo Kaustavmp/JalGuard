@@ -13,7 +13,13 @@ from backend.core.config import AppConfig
 class AIService:
     def __init__(self, config: AppConfig):
         self.config = config
-        self.client = OpenAI(api_key=config.openai_api_key, base_url=config.api_base_url, timeout=5.0, max_retries=0)
+        self.client: Optional[OpenAI] = None
+        api_key = (config.openai_api_key or "").strip()
+        if api_key:
+            try:
+                self.client = OpenAI(api_key=api_key, base_url=config.api_base_url, timeout=5.0, max_retries=0)
+            except Exception:
+                self.client = None
 
     def heuristic_action(self, obs: Observation) -> Action:
         must_fill = obs.tank_level < max(900.0, obs.forecasted_demand * 8.0)
@@ -55,6 +61,8 @@ class AIService:
             "note": note or "",
         }
         try:
+            if self.client is None:
+                raise RuntimeError("AI client unavailable")
             response = self.client.chat.completions.create(
                 model=self.config.model_name,
                 temperature=0.2,
@@ -79,6 +87,8 @@ class AIService:
             return action, "assistant", self._narrative(observation, action)
 
     def health(self) -> bool:
+        if self.client is None:
+            return False
         try:
             self.client.models.list()
             return True
