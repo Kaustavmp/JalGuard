@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "jalguard"
+version = "1.0.0"
+description = "OpenEnv-compatible rural water intelligence platform."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "Other" }
+authors = [
+  { name = "Kaustav Priyam Mohanty" }
+]
+dependencies = [
+  "fastapi>=0.104.0,<1",
+  "uvicorn>=0.24.0",
+  "pydantic>=2.0.0,<3",
+  "numpy>=1.26.0",
+  "openai>=2.7.2",
+  "openenv-core[core]>=0.2.3",
+  "python-dotenv>=1.0.0",
+  "requests>=2.32.0",
+  "PyYAML>=6.0"
+]
+
+[tool.setuptools.packages.find]
+include = ["backend*"]
