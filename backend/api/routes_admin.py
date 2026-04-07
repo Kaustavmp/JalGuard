@@ -83,7 +83,8 @@ def _run_validation_job(job_id: str, jobs: Dict[str, Dict[str, str]]) -> None:
     env = os.environ.copy()
     env.setdefault("API_BASE_URL", "https://api.openai.com/v1")
     env.setdefault("MODEL_NAME", "gpt-4o-mini")
-    env.setdefault("OPENAI_API_KEY", env.get("OPENAI_API_KEY", ""))
+    if not env.get("OPENAI_API_KEY"):
+        env["OPENAI_API_KEY"] = env.get("HF_TOKEN", "")
 
     process = subprocess.run(
         [sys.executable, "pre_submission_check.py"],

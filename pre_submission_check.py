@@ -8,6 +8,7 @@ from typing import Dict, List, Tuple
 
 import requests
 import yaml
+from dotenv import load_dotenv
 from pydantic import BaseModel
 
 from models import Action, Observation
@@ -15,7 +16,11 @@ from models import Action, Observation
 
 ROOT = Path(__file__).resolve().parent
 BASE_URL = "http://127.0.0.1:7860"
-REQUIRED_ENV = ["API_BASE_URL", "MODEL_NAME", "OPENAI_API_KEY"]
+DEFAULT_API_BASE_URL = "https://api.openai.com/v1"
+DEFAULT_MODEL_NAME = "gpt-4o-mini"
+
+# Load local .env when present so validation works in local dev without manual export.
+load_dotenv(ROOT / ".env")
 
 
 def print_result(name: str, ok: bool, detail: str) -> None:
@@ -173,10 +178,17 @@ def check_docker_build() -> Tuple[bool, str]:
 
 
 def env_var_check() -> Tuple[bool, str]:
-    missing = [name for name in REQUIRED_ENV if not os.getenv(name)]
-    if missing:
-        return False, f"Missing env vars: {missing}"
-    return True, "API_BASE_URL, MODEL_NAME, OPENAI_API_KEY are defined"
+    api_base_url = (os.getenv("API_BASE_URL") or DEFAULT_API_BASE_URL).strip()
+    model_name = (os.getenv("MODEL_NAME") or DEFAULT_MODEL_NAME).strip()
+    openai_api_key = (os.getenv("OPENAI_API_KEY") or os.getenv("HF_TOKEN") or "").strip()
+
+    if not api_base_url:
+        return False, "API_BASE_URL is empty."
+    if not model_name:
+        return False, "MODEL_NAME is empty."
+    if not openai_api_key:
+        return False, "Missing API key. Set OPENAI_API_KEY (or HF_TOKEN)."
+    return True, "Effective API_BASE_URL, MODEL_NAME, and API key are available"
 
 
 def main() -> None:

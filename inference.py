@@ -2,11 +2,16 @@ import json
 import os
 import re
 from datetime import datetime, timezone
+from pathlib import Path
 from typing import Any, Dict, List
 
 import requests
+from dotenv import load_dotenv
 from openai import OpenAI
 
+
+ROOT = Path(__file__).resolve().parent
+load_dotenv(ROOT / ".env")
 
 ENV_URL = os.getenv("ENV_URL", "http://127.0.0.1:7860").rstrip("/")
 API_BASE_URL = os.getenv("API_BASE_URL", "https://api.openai.com/v1")

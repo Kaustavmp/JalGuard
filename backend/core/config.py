@@ -6,8 +6,14 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Dict
 
+from dotenv import load_dotenv
+
 
 RUNTIME_CONFIG_PATH = Path(__file__).resolve().parents[1] / "data" / "runtime_config.json"
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+
+# Load root .env for local runs (keeps deployment env vars untouched).
+load_dotenv(PROJECT_ROOT / ".env")
 
 
 @dataclass
