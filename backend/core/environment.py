@@ -244,7 +244,10 @@ class WaterEnvironment:
         min_score = steps * -10.0
         raw = sum(rewards)
         norm = (raw - min_score) / (max_score - min_score)
-        return max(0.0, min(1.0, norm))
+        # Hackathon validator requires scores to be strictly in (0, 1), not endpoints.
+        eps = 1e-6
+        bounded = max(0.0, min(1.0, norm))
+        return max(eps, min(1.0 - eps, bounded))
 
     def get_state(self) -> Dict[str, Any]:
         return {

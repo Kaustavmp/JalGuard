@@ -118,9 +118,9 @@ def run_graders() -> Tuple[bool, str]:
         grade = requests.post(f"{BASE_URL}/grader", json={"task_id": task_id}, timeout=5)
         grade.raise_for_status()
         score = float(grade.json()["score"])
-        if not (0.0 <= score <= 1.0):
-            return False, f"Score out of range for {task_id}: {score}"
-    return True, f"graded {len(tasks)} tasks within [0.0,1.0]"
+        if not (0.0 < score < 1.0):
+            return False, f"Score must be strictly between 0 and 1 for {task_id}: {score}"
+    return True, f"graded {len(tasks)} tasks strictly within (0.0,1.0)"
 
 
 def run_inference() -> Tuple[bool, str]:
