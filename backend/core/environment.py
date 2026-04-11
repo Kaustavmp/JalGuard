@@ -17,6 +17,7 @@ NO_WATER_PENALTY = -10.0
 CONTAMINATION_PENALTY = -5.0
 TDS_HAZARD_LIMIT = 2000.0
 MAX_CHLORINE_LEVEL = 4.0
+SCORE_EPSILON = 0.01
 
 
 class WaterEnvironment:
@@ -244,8 +245,8 @@ class WaterEnvironment:
         min_score = steps * -10.0
         raw = sum(rewards)
         norm = (raw - min_score) / (max_score - min_score)
-        # Hackathon validator requires scores to be strictly in (0, 1), not endpoints.
-        eps = 1e-6
+        # Keep scores strictly inside (0, 1) with a margin robust to coarse rounding.
+        eps = SCORE_EPSILON
         bounded = max(0.0, min(1.0, norm))
         return max(eps, min(1.0 - eps, bounded))
 
